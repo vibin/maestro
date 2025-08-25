@@ -176,6 +176,18 @@ class TestCommand : Callable<Int> {
     @Option(names = ["--api-key"], description = ["[Beta] API key"])
     private var apiKey: String? = null
 
+    @Option(
+        names = ["--skip-driver-app"],
+        description = ["Skip installation and uninstallation of Maestro driver app"]
+    )
+    private var skipDriverApp: Boolean = false
+
+    @Option(
+        names = ["--skip-server-app"],
+        description = ["Skip installation and uninstallation of Maestro server app"]
+    )
+    private var skipServerApp: Boolean = false
+
     private val client: ApiClient = ApiClient(baseUrl = apiUrl)
     private val auth: Auth = Auth(client)
     private val authToken: String? = auth.getAuthToken(apiKey, triggerSignIn = false)
@@ -377,6 +389,8 @@ class TestCommand : Callable<Int> {
             platform = parent?.platform,
             isHeadless = headless,
             reinstallDriver = reinstallDriver,
+            skipDriverApp = skipDriverApp,
+            skipServerApp = skipServerApp,
             executionPlan = executionPlan
         ) { session ->
             val maestro = session.maestro

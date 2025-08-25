@@ -72,6 +72,8 @@ object MaestroSessionManager {
         isStudio: Boolean = false,
         isHeadless: Boolean = false,
         reinstallDriver: Boolean = true,
+        skipDriverApp: Boolean = false,
+        skipServerApp: Boolean = false,
         deviceIndex: Int? = null,
         executionPlan: WorkspaceExecutionPlanner.ExecutionPlan? = null,
         block: (MaestroSession) -> T,
@@ -115,6 +117,8 @@ object MaestroSessionManager {
             isHeadless = isHeadless,
             driverHostPort = driverHostPort,
             reinstallDriver = reinstallDriver,
+            skipDriverApp = skipDriverApp,
+            skipServerApp = skipServerApp,
             platformConfiguration = executionPlan?.workspaceConfig?.platform
         )
         Runtime.getRuntime().addShutdownHook(thread(start = false) {
@@ -194,6 +198,8 @@ object MaestroSessionManager {
         isStudio: Boolean,
         isHeadless: Boolean,
         reinstallDriver: Boolean,
+        skipDriverApp: Boolean,
+        skipServerApp: Boolean,
         driverHostPort: Int?,
         platformConfiguration: PlatformConfiguration? = null,
     ): MaestroSession {
@@ -204,6 +210,8 @@ object MaestroSessionManager {
                         selectedDevice.device.instanceId,
                         !connectToExistingSession,
                         driverHostPort,
+                        skipDriverApp,
+                        skipServerApp,
                     )
 
                     Platform.IOS -> createIOS(
@@ -226,6 +234,8 @@ object MaestroSessionManager {
                     selectedDevice.port,
                     driverHostPort,
                     !connectToExistingSession,
+                    skipDriverApp,
+                    skipServerApp,
                 ),
                 device = null,
             )
@@ -274,6 +284,8 @@ object MaestroSessionManager {
         port: Int?,
         driverHostPort: Int?,
         openDriver: Boolean,
+        skipDriverApp: Boolean,
+        skipServerApp: Boolean,
     ): Maestro {
         val dadb = if (port != null) {
             Dadb.create(host ?: defaultHost, port)
@@ -284,7 +296,7 @@ object MaestroSessionManager {
         }
 
         return Maestro.android(
-            driver = AndroidDriver(dadb, driverHostPort),
+            driver = AndroidDriver(dadb, driverHostPort, "", skipDriverApp, skipServerApp),
             openDriver = openDriver,
         )
     }
@@ -320,6 +332,8 @@ object MaestroSessionManager {
         instanceId: String,
         openDriver: Boolean,
         driverHostPort: Int?,
+        skipDriverApp: Boolean,
+        skipServerApp: Boolean,
     ): Maestro {
         val driver = AndroidDriver(
             dadb = Dadb
@@ -329,6 +343,8 @@ object MaestroSessionManager {
                 ?: error("Unable to find device with id $instanceId"),
             hostPort = driverHostPort,
             emulatorName = instanceId,
+            skipDriverApp = skipDriverApp,
+            skipServerApp = skipServerApp,
         )
 
         return Maestro.android(
